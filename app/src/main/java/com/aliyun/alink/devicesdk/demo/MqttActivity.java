@@ -2,13 +2,16 @@ package com.aliyun.alink.devicesdk.demo;
 
 
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import com.aliyun.alink.devicesdk.app.AppLog;
 import com.aliyun.alink.devicesdk.app.DemoApplication;
 import com.aliyun.alink.linkkit.api.LinkKit;
 import com.aliyun.alink.linksdk.cmp.connect.channel.MqttPublishRequest;
@@ -25,6 +28,9 @@ public class MqttActivity extends BaseActivity implements View.OnClickListener {
     TextView mPubTopic;
     TextView mPubText;
     TextView mSubTopic;
+    private Button button_pub;
+
+    private CountDownTimer countDownTimer;
 
     private void setListener(int id) {
         try {
@@ -46,39 +52,65 @@ public class MqttActivity extends BaseActivity implements View.OnClickListener {
         setListener(R.id.sub_dialog);
         setListener(R.id.pub_dialog);
         setListener(R.id.sub_button_item);
-
+        button_pub = findViewById(R.id.button_pub);
         mPubTopic = findViewById(R.id.publish_topic);
-        mPubTopic.setText( "/" + DemoApplication.productKey + "/" + DemoApplication.deviceName + "/user/update");
+        mPubTopic.setText("/" + DemoApplication.productKey + "/" + DemoApplication.deviceName + "/user/update");
 
         mPubText = findViewById(R.id.pub_payload);
-        mPubText.setText(
-                "{\"id\":\""  + "1\", \"version\":\"1.0\"" + ",\"params\":{\"state\":\"1\"} }"
-        );
+        mPubText.setText("{\"id\":\"" + "1\", \"version\":\"1.0\"" + ",\"params\":{\"state\":\"1\"} }");
 
         mSubTopic = findViewById(R.id.subscribe_topic);
-        mSubTopic.setText( "/" + DemoApplication.productKey + "/" + DemoApplication.deviceName + "/user/get");
+        mSubTopic.setText("/" + DemoApplication.productKey + "/" + DemoApplication.deviceName + "/user/get");
+        heart();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        countDownTimer.cancel();
+    }
+
+    private void heart() {
+        if (countDownTimer == null) {
+            countDownTimer = new CountDownTimer(6000, 2000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    String time = String.valueOf((System.currentTimeMillis() / 1000));
+                    AppLog.d(TAG, "我操 fuck " + time);
+                    mPubText.setText("{\"CH\":\"" + time + "\"}");
+                    button_pub.performClick();
+                }
+
+                @Override
+                public void onFinish() {
+                    countDownTimer.start();
+                }
+            };
+            countDownTimer.start();
+        }
+
     }
 
     public void onSetQos1ForPub(View view) {
         mQosForPub = 1;
-        ALog.d(TAG,"mQosForPub:" + mQosForPub);
+        ALog.d(TAG, "mQosForPub:" + mQosForPub);
     }
 
     public void onSetQos0ForPub(View view) {
         mQosForPub = 0;
-        ALog.d(TAG,"mQosForPub:" + mQosForPub);
+        ALog.d(TAG, "mQosForPub:" + mQosForPub);
     }
 
     public void onRRPC(View view) {
         mIsRRPC = 1;
-        ALog.d(TAG,"mIsRRPC:" + mIsRRPC);
-        mSubTopic.setText( "/ext/rrpc/" + DemoApplication.productKey + "/" + DemoApplication.deviceName + "/xxx");
+        ALog.d(TAG, "mIsRRPC:" + mIsRRPC);
+        mSubTopic.setText("/ext/rrpc/" + DemoApplication.productKey + "/" + DemoApplication.deviceName + "/xxx");
     }
 
     public void onNotRRPC(View view) {
         mIsRRPC = 0;
-        ALog.d(TAG,"mIsRRPC:" + mIsRRPC);
-        mSubTopic.setText( "/" + DemoApplication.productKey + "/" + DemoApplication.deviceName + "/user/get");
+        ALog.d(TAG, "mIsRRPC:" + mIsRRPC);
+        mSubTopic.setText("/" + DemoApplication.productKey + "/" + DemoApplication.deviceName + "/user/get");
     }
 
 
@@ -95,21 +127,21 @@ public class MqttActivity extends BaseActivity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.button_sub:{
+            case R.id.button_sub: {
                 try {
                     MqttSubscribeRequest subscribeRequest = new MqttSubscribeRequest();
                     subscribeRequest.isSubscribe = true;
                     subscribeRequest.topic = mSubTopic.getText().toString();
                     subscribeRequest.qos = 0;
                     LinkKit.getInstance().subscribe(subscribeRequest, BaseTemplateActivity.mSubscribeListener);
-                }catch (Exception e){
+                } catch (Exception e) {
                     showToast("订阅异常 ");
                 }
                 break;
             }
             case R.id.button_pub: {
 
-                try{
+                try {
                     MqttPublishRequest request = new MqttPublishRequest();
                     request.qos = mQosForPub;
                     request.isRPC = false;
@@ -123,7 +155,8 @@ public class MqttActivity extends BaseActivity implements View.OnClickListener {
 
                 break;
             }
-            default:break;
+            default:
+                break;
         }
     }
 
