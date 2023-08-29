@@ -3,10 +3,13 @@ package com.aliyun.alink.devicesdk.demo;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatEditText;
+import androidx.appcompat.widget.AppCompatImageView;
 
 import com.aliyun.alink.devicesdk.app.AppLog;
 import com.aliyun.alink.devicesdk.app.DemoApplication;
@@ -14,17 +17,24 @@ import com.aliyun.alink.devicesdk.app.DeviceInfoData;
 import com.aliyun.alink.devicesdk.manager.IDemoCallback;
 import com.aliyun.alink.devicesdk.manager.InitManager;
 import com.aliyun.alink.linkkit.api.LinkKit;
-import com.aliyun.alink.linksdk.channel.core.persistent.mqtt.MqttConfigure;
 import com.aliyun.alink.linksdk.cmp.connect.channel.MqttPublishRequest;
 import com.aliyun.alink.linksdk.cmp.core.base.ARequest;
 import com.aliyun.alink.linksdk.cmp.core.base.AResponse;
 import com.aliyun.alink.linksdk.cmp.core.listener.IConnectSendListener;
 import com.aliyun.alink.linksdk.tools.AError;
 import com.aliyun.alink.linksdk.tools.log.IDGenerater;
+import com.bumptech.glide.Glide;
+import com.hjq.http.EasyHttp;
+import com.hjq.http.listener.HttpCallback;
+import com.kongzue.dialogx.dialogs.PopTip;
 
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import h2.api.QrcodeApi;
+import h2.model.QrResp;
+import okhttp3.Call;
 
 
 /*
@@ -47,6 +57,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class DemoActivity extends BaseActivity implements View.OnClickListener {
     private static final String TAG = "DemoActivity";
+    private AppCompatEditText et_sn;
+    private AppCompatImageView iv;
+    private Button btn_req;
 
     private TextView errorTV = null;
     private AtomicInteger testDeviceIndex = new AtomicInteger(0);
@@ -58,9 +71,34 @@ public class DemoActivity extends BaseActivity implements View.OnClickListener {
         setContentView(R.layout.activity_demo);
         errorTV = findViewById(R.id.id_error_info);
         setListener();
+        reqQr();
+    }
+
+    private void reqQr() {
+        String sn = et_sn.getText().toString().trim();
+        EasyHttp.get(this).api(new QrcodeApi().setSn(sn)).request(new HttpCallback<QrResp>(null) {
+            @Override
+            public void onSucceed(QrResp result) {
+                super.onSucceed(result);
+                if (result == null) {
+                    PopTip.show("空白");
+                    return;
+                }
+                Glide.with(DemoActivity.this).load(result.getCodeUrl()).into(iv);
+            }
+
+            @Override
+            public void onEnd(Call call) {
+                super.onEnd(call);
+            }
+        });
     }
 
     private void setListener() {
+        et_sn = findViewById(R.id.et_sn);
+        iv = findViewById(R.id.iv);
+        btn_req = findViewById(R.id.btn_req);
+
         try {
             LinearLayout demoLayout = findViewById(R.id.id_demo_layout);
             int size = demoLayout.getChildCount();
@@ -193,6 +231,9 @@ public class DemoActivity extends BaseActivity implements View.OnClickListener {
             case R.id.id_start_LP:
                 startLPTest(v);
                 break;
+            case R.id.btn_req:
+                reqQr();
+                break;
             case R.id.id_start_label:
                 startLabelTest(v);
                 break;
@@ -260,32 +301,31 @@ public class DemoActivity extends BaseActivity implements View.OnClickListener {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                InitManager.init(DemoActivity.this, DemoApplication.productKey, DemoApplication.deviceName,
-                        DemoApplication.deviceSecret, DemoApplication.productSecret, DemoApplication.mqttHost,new IDemoCallback() {
+                InitManager.init(DemoActivity.this, DemoApplication.productKey, DemoApplication.deviceName, DemoApplication.deviceSecret, DemoApplication.productSecret, DemoApplication.mqttHost, new IDemoCallback() {
 
-                            @Override
-                            public void onError(AError aError) {
-                                AppLog.d(TAG, "onError() called with: aError = [" + InitManager.getAErrorString(aError) + "]");
-                                // 初始化失败，初始化失败之后需要用户负责重新初始化
-                                // 如一开始网络不通导致初始化失败，后续网络恢复之后需要重新初始化
+                    @Override
+                    public void onError(AError aError) {
+                        AppLog.d(TAG, "onError() called with: aError = [" + InitManager.getAErrorString(aError) + "]");
+                        // 初始化失败，初始化失败之后需要用户负责重新初始化
+                        // 如一开始网络不通导致初始化失败，后续网络恢复之后需要重新初始化
 
-                                if (aError != null) {
+                        if (aError != null) {
 //                                    AppLog.d(TAG, "初始化失败，错误信息：" + aError.getCode() + "-" + aError.getSubCode() + ", " + aError.getMsg());
-                                    showToast("初始化失败，错误信息：" + aError.getCode() + "-" + aError.getSubCode() + ", " + aError.getMsg());
-                                } else {
+                            showToast("初始化失败，错误信息：" + aError.getCode() + "-" + aError.getSubCode() + ", " + aError.getMsg());
+                        } else {
 //                                    AppLog.d(TAG, "初始化失败");
-                                    showToast("初始化失败");
-                                }
-                            }
+                            showToast("初始化失败");
+                        }
+                    }
 
-                            @Override
-                            public void onInitDone(Object data) {
-                                AppLog.d(TAG, "onInitDone() called with: data = [" + data + "]");
-                                DemoApplication.isInitDone = true;
-                                showToast("初始化成功");
+                    @Override
+                    public void onInitDone(Object data) {
+                        AppLog.d(TAG, "onInitDone() called with: data = [" + data + "]");
+                        DemoApplication.isInitDone = true;
+                        showToast("初始化成功");
 //                                AppLog.d(TAG, "初始化成功");
-                            }
-                        });
+                    }
+                });
             }
         }).start();
     }

@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.util.Log;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.aliyun.alink.devicesdk.app.AppLog;
 import com.aliyun.alink.devicesdk.manager.ToastUtils;
 
@@ -28,7 +30,7 @@ import java.util.Date;
  *
  */
 
-public class BaseActivity extends Activity {
+public class BaseActivity extends AppCompatActivity {
       static final String TAG = "BaseActivity";
     protected static SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
 

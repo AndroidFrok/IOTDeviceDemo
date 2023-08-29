@@ -3,11 +3,11 @@ apply plugin: 'com.android.application'
 def useLinkKitAarDep = true
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         applicationId "com.aliyun.alink.devicesdk.demo.v2"
-        minSdkVersion 19
-        targetSdkVersion 28
+        minSdkVersion 24
+        targetSdkVersion 29
         versionCode 2
         versionName "android-9"
         multiDexEnabled true
@@ -55,8 +55,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     sourceSets {
         main {
@@ -106,4 +106,19 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.1'
 
     implementation 'androidx.multidex:multidex:2.0.0'
+
+    // 网络请求框架：https://github.com/getActivity/EasyHttp
+    implementation 'com.github.getActivity:EasyHttp:11.6'
+    // OkHttp 框架：https://github.com/square/okhttp
+    // noinspection GradleDependency
+    implementation 'com.squareup.okhttp3:okhttp:3.12.13'
+
+    // Json 解析框架：https://github.com/google/gson
+    implementation 'com.google.code.gson:gson:2.10.1'
+    // Gson 解析容错：https://github.com/getActivity/GsonFactory
+    implementation 'com.github.getActivity:GsonFactory:6.6'
+    implementation 'com.github.kongzue.DialogX:DialogX:0.0.48'
+
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    implementation 'com.github.bumptech.glide:compiler:4.12.0'
 }

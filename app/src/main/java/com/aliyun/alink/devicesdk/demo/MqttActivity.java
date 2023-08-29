@@ -3,7 +3,6 @@ package com.aliyun.alink.devicesdk.demo;
 
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -16,8 +15,6 @@ import com.aliyun.alink.devicesdk.app.DemoApplication;
 import com.aliyun.alink.linkkit.api.LinkKit;
 import com.aliyun.alink.linksdk.cmp.connect.channel.MqttPublishRequest;
 import com.aliyun.alink.linksdk.cmp.connect.channel.MqttSubscribeRequest;
-import com.aliyun.alink.linksdk.cmp.core.listener.IConnectSubscribeListener;
-import com.aliyun.alink.linksdk.tools.AError;
 import com.aliyun.alink.linksdk.tools.ALog;
 import com.aliyun.alink.linksdk.tools.log.IDGenerater;
 
@@ -72,12 +69,14 @@ public class MqttActivity extends BaseActivity implements View.OnClickListener {
 
     private void heart() {
         if (countDownTimer == null) {
-            countDownTimer = new CountDownTimer(6000, 2000) {
+            long interval = 4000;
+            long totalTime = interval * 4;
+            countDownTimer = new CountDownTimer(totalTime, interval) {
                 @Override
                 public void onTick(long millisUntilFinished) {
                     String time = String.valueOf((System.currentTimeMillis() / 1000));
                     AppLog.d(TAG, "我操 fuck " + time);
-                    mPubText.setText("{\"CH\":\"" + time + "\"}");
+                    mPubText.setText("{CH," + time + "}");
                     button_pub.performClick();
                 }
 

@@ -26,6 +26,9 @@ import com.aliyun.alink.linksdk.tools.AError;
 import com.aliyun.alink.linksdk.tools.ALog;
 import com.aliyun.alink.linksdk.tools.ThreadTools;
 import com.google.gson.Gson;
+import com.hjq.http.EasyConfig;
+import com.hjq.http.config.RequestServer;
+import com.kongzue.dialogx.DialogX;
 
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
@@ -34,6 +37,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+
+import h2.MyRequestServer;
+import h2.RequestHandler;
+import okhttp3.OkHttpClient;
 
 /*
  * Copyright (c) 2014-2016 Alibaba Group. All rights reserved.
@@ -76,7 +83,7 @@ public class DemoApplication extends Application {
     public void onCreate() {
         super.onCreate();
         MultiDex.install(this);
-
+        init();
         MqttConfigure.itlsLogLevel = Id2ItlsSdk.DEBUGLEVEL_NODEBUG;
         AppLog.setLevel(ALog.LEVEL_DEBUG);
         // 设置心跳时间，默认65秒
@@ -440,5 +447,26 @@ public class DemoApplication extends Application {
 
     public static Context getAppContext() {
         return mAppContext;
+    }
+
+    private void init() {
+        DialogX.init(this);
+        initApi();
+    }
+
+    private void initApi() {
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
+        EasyConfig.with(okHttpClient)
+                // 是否打印日志
+                .setLogEnabled(true)
+                // 设置服务器配置
+                .setServer(new MyRequestServer())
+                // 设置请求处理策略
+                .setHandler(new RequestHandler(this))
+                // 设置请求重试次数
+                .setRetryCount(1).into();
+
+        // 设置 Json 解析容错监听
+
     }
 }

@@ -7,7 +7,7 @@
      /**
        * 设备在产品内的唯一标识符
        */
-    "deviceName": "A10000002A",
+    "deviceName": "B10000000M",
 
     /**
      * 产品秘钥,一型一密(预注册/免预注册)的情况下需要填入,否则为空
@@ -17,7 +17,7 @@
     /**
      * 物联网平台为设备颁发的设备密钥，用于认证加密. 一机一密情况下需要填入, 否则为空
      */
-    "deviceSecret": "182f2207be09a32341635fc4b3db7d26",
+    "deviceSecret": "7df2cd589e53793b3c96a95ac0963eeb",
 
     /**
      * 如果productSecret不为空,但deviceSecret为空,表明设备采用一型一密方式进行认证
@@ -59,7 +59,7 @@
       {
           "productKey": "k040IP2ANBJ",
           "productSecret": "uq9ZqxpGCNJXm1fr",
-          "deviceName": "A10000002A"
+          "deviceName": "B10000000M"
       },
 
     ]
